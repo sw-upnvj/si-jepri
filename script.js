@@ -249,15 +249,18 @@ function submitBooking() {
     if ((eH * 60 + eM) <= (sH * 60 + sM)) return showMessage('Jam selesai harus lebih besar dari jam mulai.', 'error');
 
     const agendaType = document.getElementById('agendaType').value;
-    let detail1 = ''; let detail2 = '';
+    let detail1 = ''; 
+    let detail2 = '';
+    let pertemuan = '-';
+    let materi = '-';
 
     if (agendaType === 'Penjadwalan Kuliah') {
         detail1 = document.getElementById('detail1_kuliah').value; 
-        let pertemuan = document.getElementById('pertemuan_kuliah').value;
-        let materi = document.getElementById('materi_kuliah').value;
-        let ruang = document.getElementById('detail2_kuliah').value;
-        if (!detail1 || !pertemuan || !materi || !ruang) return showMessage('Lengkapi Mata Kuliah, Pertemuan, Materi, dan Ruang.', 'error');
-        detail2 = `Pertemuan: ${pertemuan} | Materi: ${materi} | Ruang: ${ruang}`;
+        pertemuan = document.getElementById('pertemuan_kuliah').value;
+        materi = document.getElementById('materi_kuliah').value;
+        detail2 = document.getElementById('detail2_kuliah').value;
+        
+        if (!detail1 || !pertemuan || !materi || !detail2) return showMessage('Lengkapi Mata Kuliah, Pertemuan, Materi, dan Ruang.', 'error');
     } else if (agendaType === 'Bimbingan/ Ujian/ Responsi') {
         detail1 = document.getElementById('detail1_bimbingan').value;
         detail2 = document.getElementById('detail2_bimbingan').value || '-';
@@ -270,14 +273,25 @@ function submitBooking() {
 
     const studentName = document.getElementById('studentName').value;
     const studentEmail = document.getElementById('studentEmail').value;
-    if (!studentName || !studentEmail) return showMessage('Lengkapi Nama dan Email Mahasiswa.', 'error');
+    const studentPhone = document.getElementById('studentPhone').value; 
+
+    if (!studentName || !studentEmail || !studentPhone) return showMessage('Lengkapi Nama, Email, dan No WA Mahasiswa.', 'error');
     
     showMessage('⏳ Mengirim pengajuan...', 'loading');
 
     const bookingData = {
-        lecturerEmail: selectedLecturerEmail, studentName, studentEmail, 
-        date: selectedDate, startTime: selectedStartTime, endTime: selectedEndTime, 
-        agendaType, detail1, detail2
+        lecturerEmail: selectedLecturerEmail, 
+        studentName, 
+        studentEmail, 
+        studentPhone, 
+        date: selectedDate, 
+        startTime: selectedStartTime, 
+        endTime: selectedEndTime, 
+        agendaType, 
+        detail1, 
+        detail2,
+        pertemuan,
+        materi
     };
 
     fetch(API_URL, {
@@ -292,6 +306,7 @@ function submitBooking() {
             document.getElementById('studentForm').classList.add('hidden');
             document.getElementById('studentName').value = '';
             document.getElementById('studentEmail').value = '';
+            document.getElementById('studentPhone').value = '';
             document.getElementById('timeSection').style.display = 'none';
             document.getElementById('dynamicFormSection').classList.add('hidden');
             renderCalendar(); 
