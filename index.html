@@ -239,9 +239,7 @@
     </div>
   </div>
 
-  <button id="checkBtn" class="btn-submit hidden" onclick="validateAndShowStudentForm()">Lanjut Isi Data Diri</button>
-
-  <!-- DATA MAHASISWA -->
+  <!-- DATA MAHASISWA (LANGSUNG TAMPIL) -->
   <div id="studentForm" class="hidden">
     <div class="form-group">
       <label>Nama Mahasiswa</label>
@@ -251,6 +249,8 @@
       <label>Email Mahasiswa</label>
       <input type="email" id="studentEmail" class="form-control" placeholder="nama@email.com">
     </div>
+    
+    <!-- TOMBOL AJUKAN LANGSUNG -->
     <button class="btn-submit" onclick="submitBooking()">Set Reminder (Ajukan)</button>
   </div>
 
@@ -338,7 +338,6 @@ function resetCalendar() {
     
     document.getElementById('timeSection').style.display = 'none';
     document.getElementById('dynamicFormSection').classList.add('hidden');
-    document.getElementById('checkBtn').classList.add('hidden');
     document.getElementById('studentForm').classList.add('hidden');
 }
 
@@ -397,8 +396,7 @@ function renderCalendar() {
                 allTimes.forEach(time => {
                     let isBooked = false;
                     bookedSlots.forEach(slot => {
-                        // --- PERBAIKAN DI SINI ---
-                        // Kita ubah "8:00" menjadi "08:00" agar cocok dengan sistem
+                        // PERBAIKAN FORMAT JAM 8:00 -> 08:00
                         let startFix = slot.start.trim();
                         if (startFix.length === 4) startFix = '0' + startFix;
                         
@@ -406,7 +404,6 @@ function renderCalendar() {
                         if (endFix.length === 4) endFix = '0' + endFix;
                         
                         if (time >= startFix && time < endFix) isBooked = true;
-                        // -------------------------
                     });
                     if (!isBooked) availableCount++;
                 });
@@ -446,8 +443,7 @@ function selectDate(dateStr, el) {
     
     document.getElementById('timeSection').style.display = 'block';
     document.getElementById('dynamicFormSection').classList.remove('hidden');
-    document.getElementById('checkBtn').classList.remove('hidden');
-    document.getElementById('studentForm').classList.add('hidden');
+    document.getElementById('studentForm').classList.remove('hidden');
     
     loadDropdownTimes(dateStr);
 }
@@ -492,7 +488,13 @@ function loadDropdownTimes(dateVal) {
         allTimes.forEach(time => {
             let isBooked = false;
             bookedSlots.forEach(slot => {
-                if (time >= slot.start && time < slot.end) isBooked = true;
+                // SINKRONISASI FORMAT JAM
+                let startFix = slot.start.trim();
+                if (startFix.length === 4) startFix = '0' + startFix;
+                let endFix = slot.end.trim();
+                if (endFix.length === 4) endFix = '0' + endFix;
+                
+                if (time >= startFix && time < endFix) isBooked = true;
             });
 
             const optStart = Array.from(startSelect.options).find(o => o.value === time);
@@ -580,9 +582,9 @@ function changeAgendaForm() {
 }
 
 // ==========================================
-// VALIDASI & SUBMIT
+// SUBMIT BOOKING
 // ==========================================
-function validateAndShowStudentForm() {
+function submitBooking() {
     selectedStartTime = document.getElementById('startTimeSelect').value;
     selectedEndTime = document.getElementById('endTimeSelect').value;
 
@@ -596,44 +598,26 @@ function validateAndShowStudentForm() {
         showMessage('Jam selesai harus lebih besar dari jam mulai.', 'error'); return;
     }
 
-    const agenda = document.getElementById('agendaType').value;
-    if (agenda === 'Penjadwalan Kuliah') {
-        if (!document.getElementById('detail1_kuliah').value || !document.getElementById('detail2_kuliah').value) {
-            showMessage('Harap lengkapi Mata Kuliah dan Ruang/GMeet.', 'error'); return;
-        }
-    } else if (agenda === 'Bimbingan/ Ujian/ Responsi') {
-        if (!document.getElementById('detail1_bimbingan').value) {
-            showMessage('Harap lengkapi Keterangan.', 'error'); return;
-        }
-    } else {
-        if (!document.getElementById('detail1_rapat').value) {
-            showMessage('Harap lengkapi Perihal Rapat.', 'error'); return;
-        }
-    }
-
-    document.getElementById('studentForm').classList.remove('hidden');
-    document.getElementById('studentForm').scrollIntoView({ behavior: 'smooth' });
-    hideMessage();
-}
-
-function submitBooking() {
-    const studentName = document.getElementById('studentName').value;
-    const studentEmail = document.getElementById('studentEmail').value;
     const agendaType = document.getElementById('agendaType').value;
-    
     let detail1 = '';
     let detail2 = '';
 
     if (agendaType === 'Penjadwalan Kuliah') {
         detail1 = document.getElementById('detail1_kuliah').value;
         detail2 = document.getElementById('detail2_kuliah').value;
+        if (!detail1 || !detail2) { showMessage('Harap lengkapi Mata Kuliah dan Ruang/GMeet.', 'error'); return; }
     } else if (agendaType === 'Bimbingan/ Ujian/ Responsi') {
         detail1 = document.getElementById('detail1_bimbingan').value;
         detail2 = document.getElementById('detail2_bimbingan').value || '-';
+        if (!detail1) { showMessage('Harap lengkapi Keterangan.', 'error'); return; }
     } else {
         detail1 = document.getElementById('detail1_rapat').value;
         detail2 = document.getElementById('detail2_rapat').value || '-';
+        if (!detail1) { showMessage('Harap lengkapi Perihal Rapat.', 'error'); return; }
     }
+
+    const studentName = document.getElementById('studentName').value;
+    const studentEmail = document.getElementById('studentEmail').value;
 
     if (!studentName || !studentEmail) { 
         showMessage('Lengkapi Nama dan Email Mahasiswa.', 'error'); return; 
@@ -667,7 +651,6 @@ function submitBooking() {
             document.getElementById('studentEmail').value = '';
             document.getElementById('timeSection').style.display = 'none';
             document.getElementById('dynamicFormSection').classList.add('hidden');
-            document.getElementById('checkBtn').classList.add('hidden');
             renderCalendar(); 
         } else {
             showMessage('❌ ' + response.message, 'error');
