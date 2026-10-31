@@ -5,131 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Si-JePri - Sistem Integrasi Jadwal</title>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --bg-color: #e5e7eb; 
-    --primary: #1e3a5f;
-    --accent: #fca34d;
-    --text-main: #1f2937;
-    --white: #ffffff;
-    --disabled-bg: #e5e7eb;
-    --disabled-text: #9ca3af;
-  }
-
-  * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
-  
-  body {
-    background-color: var(--bg-color);
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    min-height: 100vh;
-    padding: 20px;
-  }
-
-  .phone-screen {
-    background: var(--white);
-    width: 100%;
-    max-width: 450px;
-    border-radius: 40px;
-    padding: 30px 24px 20px 24px;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-    position: relative;
-  }
-
-  .header-text { margin-bottom: 20px; }
-  .header-text h1 { font-size: 28px; font-weight: 700; color: var(--text-main); line-height: 1.2; }
-
-  .productivity-card {
-    background: var(--primary);
-    border-radius: 24px;
-    padding: 20px;
-    color: var(--white);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 30px;
-    gap: 15px;
-  }
-  .productivity-card p { font-size: 14px; line-height: 1.5; font-weight: 600; flex: 1; }
-  .productivity-card svg { width: 65px; height: 65px; flex-shrink: 0; }
-
-  .section-title { font-size: 16px; font-weight: 700; color: var(--text-main); margin-bottom: 20px; border-bottom: 2px solid #f3f4f6; padding-bottom: 10px; }
-  
-  .form-group { margin-bottom: 16px; }
-  .form-group label { display: block; font-size: 12px; font-weight: 600; color: var(--text-main); margin-bottom: 6px; }
-  .form-control {
-    width: 100%; padding: 12px 15px;
-    border: 1.5px solid #e5e7eb; border-radius: 12px;
-    font-size: 13px; background: #f9fafb; color: var(--text-main);
-    transition: all 0.2s; font-family: inherit;
-  }
-  .form-control:focus { outline: none; border-color: var(--primary); background: var(--white); box-shadow: 0 0 0 3px rgba(30, 58, 95, 0.1); }
-
-  /* STATE DISABLED */
-  .form-control:disabled, .form-control.disabled-style, .cal-container.disabled-style {
-    background-color: var(--disabled-bg) !important;
-    color: var(--disabled-text) !important;
-    border-color: #d1d5db !important;
-    cursor: not-allowed;
-    pointer-events: none;
-    opacity: 0.7;
-  }
-  
-  .cal-container.disabled-style .cal-day { background: rgba(0,0,0,0.05) !important; color: #9ca3af !important; border: none !important; cursor: not-allowed; }
-  .cal-container.disabled-style .cal-header button { background: rgba(0,0,0,0.1); color: #9ca3af; }
-
-  .cal-container { background: var(--primary); border-radius: 20px; padding: 15px; margin-bottom: 20px; transition: all 0.3s; }
-  .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; color: var(--white); }
-  .cal-header button { background: rgba(255,255,255,0.2); border: none; color: white; width: 30px; height: 30px; border-radius: 8px; cursor: pointer; }
-  .cal-header button:hover { background: rgba(255,255,255,0.3); }
-  .cal-title { font-size: 14px; font-weight: 600; }
-  
-  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
-  .cal-dow { text-align: center; font-size: 10px; color: rgba(255,255,255,0.6); font-weight: 600; margin-bottom: 5px; }
-  .cal-day {
-    aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center;
-    border-radius: 8px; font-size: 12px; font-weight: 600; color: var(--white);
-    cursor: pointer; transition: 0.2s; background: rgba(255,255,255,0.05);
-  }
-  .cal-day:hover:not(.empty):not(.disabled) { background: rgba(255,255,255,0.2); }
-  .cal-day.empty { background: transparent; cursor: default; }
-  .cal-day.disabled { color: rgba(255,255,255,0.3); background: transparent; cursor: not-allowed; }
-  
-  .cal-day.green { background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; }
-  .cal-day.orange { background: rgba(245, 158, 11, 0.2); border: 1px solid #f59e0b; }
-  .cal-day.gray { background: rgba(107, 114, 128, 0.4); border: 1px solid #6b7280; color: #9ca3af; }
-  .cal-day.selected { background: var(--accent); color: var(--white); border: none; box-shadow: 0 0 10px rgba(252,163,77,0.5); transform: scale(1.1); }
-
-  .legend { display: flex; gap: 10px; font-size: 10px; color: rgba(255,255,255,0.8); margin-top: 12px; justify-content: center; }
-  .legend span { display: flex; align-items: center; gap: 4px; }
-  .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
-  .dot.green { background: #10b981; } .dot.orange { background: #f59e0b; } .dot.gray { background: #6b7280; }
-
-  .warning-box { display: none; background: #fef3c7; color: #92400e; padding: 10px 12px; border-radius: 10px; font-size: 11px; margin-bottom: 15px; border-left: 4px solid #f59e0b; }
-
-  .info-box { background: #fff7ed; border: 1px solid #fdba74; border-radius: 12px; padding: 15px; margin-bottom: 20px; text-align: center; }
-  .info-box p { font-size: 12px; color: #9a3412; font-weight: 600; margin-bottom: 12px; line-height: 1.4; }
-  .btn-group { display: flex; gap: 10px; }
-  .btn-link { flex: 1; padding: 10px; background: var(--accent); color: var(--white); text-decoration: none; border-radius: 8px; font-size: 12px; font-weight: 700; text-align: center; transition: 0.2s; display: block; }
-  .btn-link:hover { background: #e8923c; }
-  .info-note { font-size: 10px; color: #c2410c; margin-top: 10px; display: block; }
-
-  .btn-submit { width: 100%; padding: 15px; background: var(--accent); color: var(--white); border: none; border-radius: 15px; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 10px; transition: 0.2s; box-shadow: 0 4px 15px rgba(252, 163, 77, 0.3); }
-  .btn-submit:hover:not(:disabled) { background: #e8923c; transform: translateY(-2px); }
-  .btn-submit:disabled { background: #9ca3af; box-shadow: none; cursor: not-allowed; transform: none; }
-
-  .toast { display: none; padding: 12px; border-radius: 10px; font-size: 12px; text-align: center; margin-top: 15px; font-weight: 600; }
-  .toast.success { display: block; background: #d1fae5; color: #065f46; }
-  .toast.error { display: block; background: #fee2e2; color: #991b1b; }
-
-  .loading { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.4); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; margin-right: 5px; vertical-align: middle; }
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  .watermark-footer { text-align: center; font-size: 10.5px; color: #d1d5db; margin-top: 30px; letter-spacing: 0.3px; font-weight: 500; }
-  
-  .hidden { display: none !important; }
-</style>
+<!-- MENGHUBUNGKAN KE FILE CSS -->
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 
@@ -165,7 +42,6 @@
     </select>
   </div>
 
-  <!-- KALENDER BULANAN -->
   <div class="cal-container disabled-style" id="calendarSection" style="display:none;">
     <div class="cal-header">
       <button type="button" onclick="changeMonth(-1)">‹</button>
@@ -176,12 +52,12 @@
     <div class="legend">
       <span><span class="dot green"></span> Kosong</span>
       <span><span class="dot orange"></span> Sebagian</span>
-      <span><span class="dot gray"></span> Penuh</span>
+      <span><span class="dot gray"></span> Penuh/Sabtu</span>
+      <span><span class="dot red"></span> Minggu</span>
     </div>
     <input type="hidden" id="dateInput">
   </div>
 
-  <!-- AREA JAM -->
   <div id="timeSection" style="display:none;">
     <div id="busyScheduleInfo" class="warning-box">
       <strong>⚠️ Perhatian:</strong> Dosen sudah memiliki jadwal di jam:
@@ -201,7 +77,6 @@
     <div id="durationInfo" class="warning-box" style="background:#d4edda; color:#155724; border-left-color:#28a745; display:none; text-align:center;"></div>
   </div>
 
-  <!-- FORM DINAMIS -->
   <div id="dynamicFormSection" class="hidden">
     <div class="form-group">
       <label>Opsi Agenda</label>
@@ -212,7 +87,6 @@
       </select>
     </div>
 
-    <!-- Sub-form Penjadwalan Kuliah -->
     <div id="formKuliah">
       <div class="info-box">
         <p>Pastikan Sudah memiliki Link Gmeet / Sudah Booking Kelas Secara Online.</p>
@@ -223,23 +97,26 @@
         <span class="info-note">(Password akses Booking Gmeet di telegram : <b>fikesupnvj</b>)</span>
       </div>
       <div class="form-group"><label>Mata Kuliah</label><input type="text" id="detail1_kuliah" class="form-control" placeholder="Contoh: Pemrograman Web"></div>
+      
+      <div style="display:flex; gap:10px;">
+        <div class="form-group" style="flex:1;"><label>Pertemuan Ke-</label><input type="number" id="pertemuan_kuliah" class="form-control" placeholder="Cth: 1"></div>
+        <div class="form-group" style="flex:2;"><label>Nama Materi</label><input type="text" id="materi_kuliah" class="form-control" placeholder="Cth: Pengenalan HTML"></div>
+      </div>
+
       <div class="form-group"><label>Ruang / Link GMeet</label><input type="text" id="detail2_kuliah" class="form-control" placeholder="Lab 301 / https://meet..."></div>
     </div>
 
-    <!-- Sub-form Bimbingan -->
     <div id="formBimbingan" class="hidden">
       <div class="form-group"><label>Keterangan</label><input type="text" id="detail1_bimbingan" class="form-control" placeholder="Contoh: Bimbingan Skripsi"></div>
       <div class="form-group"><label>Link Bahan (PDF)</label><input type="url" id="detail2_bimbingan" class="form-control" placeholder="https://drive.google.com/..."></div>
     </div>
 
-    <!-- Sub-form Rapat -->
     <div id="formRapat" class="hidden">
       <div class="form-group"><label>Perihal</label><input type="text" id="detail1_rapat" class="form-control" placeholder="Contoh: Rapat Prodi"></div>
       <div class="form-group"><label>Link Undangan Rapat</label><input type="url" id="detail2_rapat" class="form-control" placeholder="https://meet..."></div>
     </div>
   </div>
 
-  <!-- DATA MAHASISWA (LANGSUNG TAMPIL) -->
   <div id="studentForm" class="hidden">
     <div class="form-group">
       <label>Nama Mahasiswa</label>
@@ -250,7 +127,6 @@
       <input type="email" id="studentEmail" class="form-control" placeholder="nama@email.com">
     </div>
     
-    <!-- TOMBOL AJUKAN LANGSUNG -->
     <button class="btn-submit" onclick="submitBooking()">Set Reminder (Ajukan)</button>
   </div>
 
@@ -260,415 +136,7 @@
 
 </div>
 
-<script>
-const API_URL = 'https://script.google.com/macros/s/AKfycbzk4xCE1UYQeLkQF6r1kso0ZX4mkifi_TD-lrcQnb3Rcphu8WQKt1VLY6coxvAzOLA2/exec';
-
-let currentMonth = new Date().getMonth();
-let currentYear = new Date().getFullYear();
-
-let selectedLecturerEmail = '';
-let selectedDate = '';
-let selectedStartTime = '';
-let selectedEndTime = '';
-let allTimes = [];
-
-const monthNames = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
-
-window.onload = function() {
-    // 1. Load Dosen
-    fetch(API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify({ action: 'getLecturers' })
-    })
-    .then(res => res.json())
-    .then(response => {
-        const select = document.getElementById('lecturerSelect');
-        select.innerHTML = '<option value="">-- Pilih Dosen --</option>';
-        if (response.success && response.data) {
-            response.data.forEach(dosen => {
-                const option = document.createElement('option');
-                option.value = dosen.email;
-                option.textContent = dosen.nama;
-                select.appendChild(option);
-            });
-        }
-    });
-
-    // 2. Load List Jam (08:00 - 17:00)
-    fetch(API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify({ action: 'getTimeSlots' })
-    })
-    .then(res => res.json())
-    .then(response => {
-        if (response.success && response.data) {
-            allTimes = response.data;
-            const startSelect = document.getElementById('startTimeSelect');
-            const endSelect = document.getElementById('endTimeSelect');
-            
-            allTimes.forEach(time => {
-                startSelect.innerHTML += `<option value="${time}">${time}</option>`;
-                endSelect.innerHTML += `<option value="${time}">${time}</option>`;
-            });
-            
-            startSelect.addEventListener('change', calculateDuration);
-            endSelect.addEventListener('change', calculateDuration);
-        }
-    });
-};
-
-// ==========================================
-// LOGIKA KALENDER BULANAN
-// ==========================================
-function resetCalendar() {
-    selectedLecturerEmail = document.getElementById('lecturerSelect').value;
-    const calSection = document.getElementById('calendarSection');
-    
-    if (selectedLecturerEmail) {
-        calSection.style.display = 'block';
-        calSection.classList.remove('disabled-style');
-        calSection.querySelectorAll('button').forEach(btn => btn.disabled = false);
-        renderCalendar();
-    } else {
-        calSection.style.display = 'none';
-        calSection.classList.add('disabled-style');
-    }
-    
-    document.getElementById('timeSection').style.display = 'none';
-    document.getElementById('dynamicFormSection').classList.add('hidden');
-    document.getElementById('studentForm').classList.add('hidden');
-}
-
-function changeMonth(dir) {
-    currentMonth += dir;
-    if (currentMonth < 0) { currentMonth = 11; currentYear--; }
-    if (currentMonth > 11) { currentMonth = 0; currentYear++; }
-    renderCalendar();
-}
-
-function renderCalendar() {
-    const grid = document.getElementById('calendarGrid');
-    grid.innerHTML = '';
-    document.getElementById('monthYearLabel').textContent = `${monthNames[currentMonth]} ${currentYear}`;
-
-    const days = ['S', 'S', 'R', 'K', 'J', 'S', 'M'];
-    days.forEach(d => {
-        const el = document.createElement('div'); el.className = 'cal-dow'; el.textContent = d; grid.appendChild(el);
-    });
-
-    const firstDay = new Date(currentYear, currentMonth, 1).getDay();
-    const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-    const today = new Date(); today.setHours(0,0,0,0);
-
-    for (let i = 0; i < firstDay; i++) {
-        const el = document.createElement('div'); el.className = 'cal-day empty'; grid.appendChild(el);
-    }
-
-    for (let day = 1; day <= daysInMonth; day++) {
-        const dateObj = new Date(currentYear, currentMonth, day);
-        const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-        
-        const box = document.createElement('div');
-        box.className = 'cal-day';
-        box.textContent = day;
-
-        if (dateObj < today) {
-            box.classList.add('disabled');
-            box.title = "Tanggal sudah lewat";
-        } else {
-            box.classList.add('gray');
-            box.style.opacity = '0.5';
-            box.style.cursor = 'wait';
-            box.id = `day-${dateStr}`;
-
-            fetch(API_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify({ action: 'getBookedTimes', lecturerEmail: selectedLecturerEmail, date: dateStr })
-            })
-            .then(res => res.json())
-            .then(response => {
-                const bookedSlots = response.data || [];
-                let availableCount = 0;
-                
-                allTimes.forEach(time => {
-                    let isBooked = false;
-                    bookedSlots.forEach(slot => {
-                        // PERBAIKAN FORMAT JAM 8:00 -> 08:00
-                        let startFix = slot.start.trim();
-                        if (startFix.length === 4) startFix = '0' + startFix;
-                        
-                        let endFix = slot.end.trim();
-                        if (endFix.length === 4) endFix = '0' + endFix;
-                        
-                        if (time >= startFix && time < endFix) isBooked = true;
-                    });
-                    if (!isBooked) availableCount++;
-                });
-
-                const el = document.getElementById(`day-${dateStr}`);
-                if (el) {
-                    el.style.opacity = '1';
-                    el.style.cursor = 'pointer';
-
-                    if (bookedSlots.length === 0 && availableCount > 0) {
-                        el.className = 'cal-day green';
-                        el.title = "Dosen kosong seharian";
-                        el.onclick = () => selectDate(dateStr, el);
-                    } 
-                    else if (bookedSlots.length > 0 && availableCount > 0) {
-                        el.className = 'cal-day orange';
-                        el.title = "Dosen ada jadwal, tapi masih ada jam kosong";
-                        el.onclick = () => selectDate(dateStr, el);
-                    } 
-                    else {
-                        el.className = 'cal-day gray';
-                        el.title = "Jadwal penuh";
-                    }
-                }
-            });
-        }
-        grid.appendChild(box);
-    }
-}
-
-function selectDate(dateStr, el) {
-    document.querySelectorAll('.cal-day.selected').forEach(d => d.classList.remove('selected'));
-    el.classList.add('selected');
-    
-    selectedDate = dateStr;
-    document.getElementById('dateInput').value = dateStr;
-    
-    document.getElementById('timeSection').style.display = 'block';
-    document.getElementById('dynamicFormSection').classList.remove('hidden');
-    document.getElementById('studentForm').classList.remove('hidden');
-    
-    loadDropdownTimes(dateStr);
-}
-
-// ==========================================
-// LOGIKA DROPDOWN JAM
-// ==========================================
-function loadDropdownTimes(dateVal) {
-    const startSelect = document.getElementById('startTimeSelect');
-    const endSelect = document.getElementById('endTimeSelect');
-    const busyInfo = document.getElementById('busyScheduleInfo');
-    const busyList = document.getElementById('busyList');
-    
-    startSelect.value = "";
-    endSelect.value = "";
-    document.getElementById('durationInfo').style.display = 'none';
-    busyInfo.style.display = 'none';
-    busyList.innerHTML = '';
-
-    startSelect.options[0].text = "⏳ Memuat...";
-    endSelect.options[0].text = "⏳ Memuat...";
-
-    fetch(API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify({ action: 'getBookedTimes', lecturerEmail: selectedLecturerEmail, date: dateVal })
-    })
-    .then(res => res.json())
-    .then(response => {
-        startSelect.options[0].text = "-- Pilih --";
-        endSelect.options[0].text = "-- Pilih --";
-        
-        const bookedSlots = response.data || [];
-        
-        if (bookedSlots.length > 0) {
-            busyInfo.style.display = 'block';
-            bookedSlots.forEach(slot => {
-                busyList.innerHTML += `<li>${slot.start} - ${slot.end}</li>`;
-            });
-        }
-        
-        allTimes.forEach(time => {
-            let isBooked = false;
-            bookedSlots.forEach(slot => {
-                // SINKRONISASI FORMAT JAM
-                let startFix = slot.start.trim();
-                if (startFix.length === 4) startFix = '0' + startFix;
-                let endFix = slot.end.trim();
-                if (endFix.length === 4) endFix = '0' + endFix;
-                
-                if (time >= startFix && time < endFix) isBooked = true;
-            });
-
-            const optStart = Array.from(startSelect.options).find(o => o.value === time);
-            if (optStart) {
-                if (isBooked) {
-                    optStart.disabled = true;
-                    optStart.text = time + " (Terisi)";
-                } else {
-                    optStart.disabled = false;
-                    optStart.text = time;
-                }
-            }
-
-            const optEnd = Array.from(endSelect.options).find(o => o.value === time);
-            if (optEnd) {
-                if (isBooked) {
-                    optEnd.disabled = true;
-                    optEnd.text = time + " (Terisi)";
-                } else {
-                    optEnd.disabled = false;
-                    optEnd.text = time;
-                }
-            }
-        });
-    })
-    .catch(err => {
-        startSelect.options[0].text = "-- Gagal Memuat --";
-        endSelect.options[0].text = "-- Gagal Memuat --";
-    });
-}
-
-function calculateDuration() {
-    hideMessage();
-    const startTime = document.getElementById('startTimeSelect').value;
-    const endTime = document.getElementById('endTimeSelect').value;
-    const durationInfo = document.getElementById('durationInfo');
-    
-    if (startTime && endTime) {
-        const [startH, startM] = startTime.split(':').map(Number);
-        const [endH, endM] = endTime.split(':').map(Number);
-        
-        const startMinutes = startH * 60 + startM;
-        const endMinutes = endH * 60 + endM;
-        const duration = endMinutes - startMinutes;
-        
-        if (duration <= 0) {
-            durationInfo.textContent = '⚠️ Jam selesai harus lebih besar dari jam mulai';
-            durationInfo.style.background = '#f8d7da';
-            durationInfo.style.color = '#721c24';
-            durationInfo.style.borderLeftColor = '#dc3545';
-        } else {
-            const hours = Math.floor(duration / 60);
-            const mins = duration % 60;
-            let durationText = '⏱️ Durasi: ';
-            if (hours > 0) durationText += `${hours} jam `;
-            if (mins > 0) durationText += `${mins} menit`;
-            durationInfo.textContent = durationText;
-            durationInfo.style.background = '#d4edda';
-            durationInfo.style.color = '#155724';
-            durationInfo.style.borderLeftColor = '#28a745';
-        }
-        durationInfo.style.display = 'block';
-    } else {
-        durationInfo.style.display = 'none';
-    }
-}
-
-// ==========================================
-// LOGIKA FORM DINAMIS
-// ==========================================
-function changeAgendaForm() {
-    const agenda = document.getElementById('agendaType').value;
-    
-    document.getElementById('formKuliah').classList.add('hidden');
-    document.getElementById('formBimbingan').classList.add('hidden');
-    document.getElementById('formRapat').classList.add('hidden');
-    
-    if (agenda === 'Penjadwalan Kuliah') {
-        document.getElementById('formKuliah').classList.remove('hidden');
-    } else if (agenda === 'Bimbingan/ Ujian/ Responsi') {
-        document.getElementById('formBimbingan').classList.remove('hidden');
-    } else {
-        document.getElementById('formRapat').classList.remove('hidden');
-    }
-}
-
-// ==========================================
-// SUBMIT BOOKING
-// ==========================================
-function submitBooking() {
-    selectedStartTime = document.getElementById('startTimeSelect').value;
-    selectedEndTime = document.getElementById('endTimeSelect').value;
-
-    if (!selectedStartTime || !selectedEndTime) {
-        showMessage('Harap pilih jam mulai dan jam selesai.', 'error'); return;
-    }
-
-    const [startH, startM] = selectedStartTime.split(':').map(Number);
-    const [endH, endM] = selectedEndTime.split(':').map(Number);
-    if ((endH * 60 + endM) <= (startH * 60 + startM)) {
-        showMessage('Jam selesai harus lebih besar dari jam mulai.', 'error'); return;
-    }
-
-    const agendaType = document.getElementById('agendaType').value;
-    let detail1 = '';
-    let detail2 = '';
-
-    if (agendaType === 'Penjadwalan Kuliah') {
-        detail1 = document.getElementById('detail1_kuliah').value;
-        detail2 = document.getElementById('detail2_kuliah').value;
-        if (!detail1 || !detail2) { showMessage('Harap lengkapi Mata Kuliah dan Ruang/GMeet.', 'error'); return; }
-    } else if (agendaType === 'Bimbingan/ Ujian/ Responsi') {
-        detail1 = document.getElementById('detail1_bimbingan').value;
-        detail2 = document.getElementById('detail2_bimbingan').value || '-';
-        if (!detail1) { showMessage('Harap lengkapi Keterangan.', 'error'); return; }
-    } else {
-        detail1 = document.getElementById('detail1_rapat').value;
-        detail2 = document.getElementById('detail2_rapat').value || '-';
-        if (!detail1) { showMessage('Harap lengkapi Perihal Rapat.', 'error'); return; }
-    }
-
-    const studentName = document.getElementById('studentName').value;
-    const studentEmail = document.getElementById('studentEmail').value;
-
-    if (!studentName || !studentEmail) { 
-        showMessage('Lengkapi Nama dan Email Mahasiswa.', 'error'); return; 
-    }
-    
-    showMessage('⏳ Mengirim pengajuan...', 'loading');
-
-    const bookingData = {
-        lecturerEmail: selectedLecturerEmail, 
-        studentName, 
-        studentEmail, 
-        date: selectedDate, 
-        startTime: selectedStartTime, 
-        endTime: selectedEndTime, 
-        agendaType,
-        detail1,
-        detail2
-    };
-
-    fetch(API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify({ action: 'submitBooking', bookingData })
-    })
-    .then(res => res.json())
-    .then(response => {
-        if (response.success) {
-            showMessage('✅ ' + response.message, 'success');
-            document.getElementById('studentForm').classList.add('hidden');
-            document.getElementById('studentName').value = '';
-            document.getElementById('studentEmail').value = '';
-            document.getElementById('timeSection').style.display = 'none';
-            document.getElementById('dynamicFormSection').classList.add('hidden');
-            renderCalendar(); 
-        } else {
-            showMessage('❌ ' + response.message, 'error');
-        }
-    })
-    .catch(err => showMessage('❌ Kesalahan koneksi.', 'error'));
-}
-
-function showMessage(text, type) {
-    const box = document.getElementById('messageBox');
-    box.textContent = text; 
-    box.className = 'toast ' + type; 
-}
-function hideMessage() { 
-    const box = document.getElementById('messageBox');
-    box.className = 'toast hidden'; 
-}
-</script>
-
+<!-- MENGHUBUNGKAN KE FILE JAVASCRIPT -->
+<script src="script.js"></script>
 </body>
 </html>
